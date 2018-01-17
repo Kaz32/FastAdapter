@@ -1,6 +1,7 @@
 package com.mikepenz.fastadapter.app;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,15 +13,24 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.mikepenz.fastadapter.IAdapter;
+import com.mikepenz.fastadapter.adapters.ItemAdapter;
 import com.mikepenz.fastadapter.app.dummy.ImageDummyData;
 import com.mikepenz.fastadapter.app.items.ImageItem;
+import com.mikepenz.fastadapter.app.items.SimpleItem;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.mikepenz.fastadapter.listeners.OnClickListener;
+import com.mikepenz.fastadapter_extensions.items.ProgressItem;
+import com.mikepenz.fastadapter_extensions.scroll.EndlessRecyclerOnScrollListener;
 import com.mikepenz.materialize.MaterializeBuilder;
+
+import static com.mikepenz.fastadapter.adapters.ItemAdapter.items;
 
 public class ImageListActivity extends AppCompatActivity {
     //save our FastAdapter
     private FastItemAdapter<ImageItem> mFastItemAdapter;
+    private ItemAdapter footerAdapter;
+
+    private EndlessRecyclerOnScrollListener endlessRecyclerOnScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +48,9 @@ public class ImageListActivity extends AppCompatActivity {
 
         //create our FastAdapter which will manage everything
         mFastItemAdapter = new FastItemAdapter<>();
+
+        footerAdapter = items();
+        mFastItemAdapter.addAdapter(1, footerAdapter);
 
         //configure our fastAdapter
         mFastItemAdapter.withOnClickListener(new OnClickListener<ImageItem>() {
@@ -61,6 +74,26 @@ public class ImageListActivity extends AppCompatActivity {
         }
         rv.setItemAnimator(new DefaultItemAnimator());
         rv.setAdapter(mFastItemAdapter);
+
+        endlessRecyclerOnScrollListener = new EndlessRecyclerOnScrollListener(footerAdapter) {
+            @Override
+            public void onLoadMore(final int currentPage) {
+                footerAdapter.clear();
+                footerAdapter.add(new ProgressItem().withEnabled(false));
+                //simulate networking (2 seconds)
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        footerAdapter.clear();
+                        for (int i = 1; i < 16; i++) {
+                            mFastItemAdapter.add(ImageDummyData.getImageItems());
+                        }
+                    }
+                }, 2000);
+            }
+        };
+        rv.addOnScrollListener(endlessRecyclerOnScrollListener);
 
         //fill with some sample data
         mFastItemAdapter.add(ImageDummyData.getImageItems());
