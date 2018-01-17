@@ -1,34 +1,28 @@
 language: android
-
 android:
   components:
-    # Update tools and then platform-tools explicitly so lint gets an updated database. Can be removed once 3.0 is out.
     - tools
     - platform-tools
+    - build-tools-27.0.2
+    - android-27
     - sys-img-armeabi-v7a-android-18
-
+before_install:
+    - yes | sdkmanager "platforms;android-27"
+    - yes | sdkmanager "build-tools;27.0.1"
+    - yes | sdkmanager "build-tools;27.0.2"
 jdk:
-  - oraclejdk8
-
-before_script:
-    # Install SDK license so Android Gradle plugin can install deps.
-    - mkdir "$ANDROID_HOME/licenses" || true
-    - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
-
-script: ./gradlew clean test
-
+    - oraclejdk8
+script:
+    - ./gradlew clean test
 branches:
   except:
     - gh-pages
-
 notifications:
   email: false
-
-sudo: false
-
 before_cache:
     - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-
 cache:
   directories:
-    - $HOME/.gradle
+    - $HOME/.m2
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/

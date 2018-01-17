@@ -4,10 +4,10 @@ import android.support.annotation.IntDef;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-import com.mikepenz.fastadapter.IDraggable;
+import com.mikepenz.fastadapter.FastAdapter;
+import com.mikepenz.fastadapter.IItem;
 import com.mikepenz.fastadapter.adapters.ItemAdapter;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
-import com.mikepenz.library_extensions.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -68,8 +68,9 @@ public class SimpleDragCallback extends ItemTouchHelper.SimpleCallback {
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
         // remember the from/to positions
-        if (target.itemView.getTag(R.id.fastadapter_item) instanceof IDraggable) {
-            if (((IDraggable) target.itemView.getTag(R.id.fastadapter_item)).isDraggable()) {
+        IItem item = FastAdapter.getHolderAdapterItem(viewHolder);
+        if (item instanceof IDraggable) {
+            if (((IDraggable) item).isDraggable()) {
                 if (mFrom == RecyclerView.NO_POSITION) {
                     mFrom = viewHolder.getAdapterPosition();
                 }
@@ -81,8 +82,9 @@ public class SimpleDragCallback extends ItemTouchHelper.SimpleCallback {
             ItemAdapter itemAdapter = null;
             if (adapter instanceof FastItemAdapter) {
                 itemAdapter = ((FastItemAdapter) adapter).getItemAdapter();
-            } else if (adapter instanceof ItemAdapter) {
-                itemAdapter = (ItemAdapter) adapter;
+            } else if (adapter instanceof FastAdapter) {
+                //TODO this logic only works for the adapter at position 0 --> in the past it also only worked for the outer adapter
+                itemAdapter = (ItemAdapter) ((FastAdapter) adapter).adapter(0);
             }
             if (itemAdapter != null) {
                 itemAdapter.move(itemAdapter.getFastAdapter().getHolderAdapterPosition(viewHolder), itemAdapter.getFastAdapter().getHolderAdapterPosition(target));
@@ -95,8 +97,9 @@ public class SimpleDragCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public int getDragDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        if (viewHolder.itemView.getTag(R.id.fastadapter_item) instanceof IDraggable) {
-            if (((IDraggable) viewHolder.itemView.getTag(R.id.fastadapter_item)).isDraggable()) {
+        IItem item = FastAdapter.getHolderAdapterItem(viewHolder);
+        if (item instanceof IDraggable) {
+            if (((IDraggable) item).isDraggable()) {
                 return super.getDragDirs(recyclerView, viewHolder);
             } else {
                 return 0;
