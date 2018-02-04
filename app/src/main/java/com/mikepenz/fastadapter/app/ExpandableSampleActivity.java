@@ -82,6 +82,22 @@ public class ExpandableSampleActivity extends AppCompatActivity {
                             subSubItem
                                     .withName("---- SubSubTest " + iii)
                                     .withIdentifier(identifier.getAndIncrement());
+
+
+                            if (iii % 2 == 0) {
+                                List<IItem> subSubSubItems = new LinkedList<>();
+                                for (int iiii = 1; iiii <=4; iiii++) {
+                                    SimpleSubExpandableItem subSubSubItem = new SimpleSubExpandableItem();
+                                    subSubSubItem
+                                            .withName("------ SubSubTest " + iiii)
+                                            .withIdentifier(identifier.getAndIncrement());
+
+                                    subSubSubItems.add(subSubSubItem);
+                                }
+                                subSubItem.withSubItems(subSubSubItems);
+                            }
+
+
                             subSubItems.add(subSubItem);
                         }
                         subItem.withSubItems(subSubItems);
